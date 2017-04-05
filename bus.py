@@ -8,7 +8,7 @@ from LcdBlinker import *
 class BusSign:
 	internetLED = 1
 	nextbusLED = 2	
-	
+	heartbeatLED = 3	
 
 
 	def __init__(self):
@@ -112,6 +112,13 @@ class BusSign:
 			else:
 				self.myseg.writeToPair(self.Thurston89101[datapoint][0],(0+datapoint)+pairOffset)
 
+		pairOffset = 0
+		for datapoint in range (0,2):
+			if (datapoint + 1) > len(self.Malden101):
+				self.myseg2.turnPairOff((0+datapoint)+pairOffset)
+			else:
+				self.myseg2.writeToPair(self.Malden101[datapoint][0],(0+datapoint)+pairOffset)
+
 
 
 
@@ -179,9 +186,9 @@ class BusSign:
 		self.isBeating = not self.isBeating
 	
 		if self.isBeating:
-			self.blink.setOnLED(0)
+			self.blink.setOnLED(self.heartbeatLED)
 		else:
-			self.blink.setOffLED(0)
+			self.blink.setOffLED(self.heartbeatLED)
 
 	
 sign = BusSign()
