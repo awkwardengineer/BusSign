@@ -16,8 +16,13 @@ class BusSign:
 		self.myseg2 = SegDisplay(1,0x02)
 		self.Fenwick89=[]
 		self.Thurston89101=[]
+		self.Medford80=[]
 		self.blink = LcdBlinker()
 		self.isBeating = True
+	
+		while not isInternetUp:
+			self.heartbeat()
+			time.sleep(1)
 	
 		while True:
 
@@ -67,6 +72,8 @@ class BusSign:
 				raw_thurston = urllib2.urlopen("http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=mbta&stopId=2704")
 				self.thurston_soup = BeautifulSoup(raw_thurston, "html.parser")
 			
+				raw_medford = urllib2.urlopen("http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=mbta&stopId=2387")
+				self.medford_soup = BeautifulSoup(raw_medford, "html.parser")
 					
 				self.blink.setOffLED(self.nextbusLED)
 				return True
@@ -181,6 +188,21 @@ class BusSign:
 
 			for bus in sullivan_buses:
 				self.Thurston89101.append([int(bus),"Sullivan"])
+				
+		print " "
+		print "80 Bus, Medford @ Thurston:"
+		
+		self.Medford80 = []
+		lechmere_buses = self.medford_soup.find_all('prediction')
+		if lechmere_buses != None:	
+			lechmere_buses = map(lambda x: x['seconds'], lechmere_buses)
+			lechmere_buses = map(lambda x: int(x), lechmere_buses)
+			lechmere_buses.sort()   #sorts in place
+			lechmere_buses = map(lambda x: str(x), lechmere_buses)
+			print "89/101 bus(es) to Sullivan: " + ' '.join(lechmere_buses)
+
+			for bus in sullivan_buses:
+				self.Medford80.append([int(bus),"Lechemere"])
 
 	def heartbeat(self):
 		self.isBeating = not self.isBeating
