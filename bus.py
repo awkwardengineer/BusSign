@@ -8,7 +8,7 @@ from LcdBlinker import *
 class BusSign:
 	internetLED = 1
 	nextbusLED = 2	
-	heartbeatLED = 3	
+	heartbeatLED = 0	
 
 
 	def __init__(self):
@@ -16,11 +16,12 @@ class BusSign:
 		self.myseg2 = SegDisplay(1,0x02)
 		self.Fenwick89=[]
 		self.Thurston89101=[]
+		self.Malden101=[]
 		self.Medford80=[]
 		self.blink = LcdBlinker()
 		self.isBeating = True
 	
-		while not isInternetUp:
+		while not self.isInternetUp:
 			self.heartbeat()
 			time.sleep(1)
 	
@@ -100,7 +101,7 @@ class BusSign:
 		#sort on first key, which is minutes
 		self.Fenwick89.sort(key=lambda x: x[0])
 		
-		pairOffset = 0
+		pairOffset = 2
 		for datapoint in range (0,2):
 			if (datapoint + 1) > len(self.Fenwick89):
 				self.myseg.turnPairOff((0+datapoint)+pairOffset)
@@ -111,20 +112,31 @@ class BusSign:
 					dot = False
 				self.myseg.writeToPair(self.Fenwick89[datapoint][0],(0+datapoint)+pairOffset,dot)
 
+		pairOffset = 0
+		for datapoint in range (0,2):
+			if (datapoint + 1) > len(self.Malden101):
+				self.myseg.turnPairOff((0+datapoint)+pairOffset)
+			else:
+				self.myseg.writeToPair(self.Malden101[datapoint][0],(0+datapoint)+pairOffset)
+
 		pairOffset = 2
 		for datapoint in range (0,2):
 
 			if (datapoint + 1) > len(self.Thurston89101):
-				self.myseg.turnPairOff((0+datapoint)+pairOffset)
+				self.myseg2.turnPairOff((0+datapoint)+pairOffset)
 			else:
-				self.myseg.writeToPair(self.Thurston89101[datapoint][0],(0+datapoint)+pairOffset)
+				self.myseg2.writeToPair(self.Thurston89101[datapoint][0],(0+datapoint)+pairOffset)
+
+
 
 		pairOffset = 0
 		for datapoint in range (0,2):
-			if (datapoint + 1) > len(self.Malden101):
+			if (datapoint + 1) > len(self.Medford80):
 				self.myseg2.turnPairOff((0+datapoint)+pairOffset)
 			else:
-				self.myseg2.writeToPair(self.Malden101[datapoint][0],(0+datapoint)+pairOffset)
+				self.myseg2.writeToPair(self.Medford80[datapoint][0],(0+datapoint)+pairOffset)
+
+
 
 
 
@@ -133,6 +145,8 @@ class BusSign:
 	def processFeed(self):
 
 		self.Fenwick89=[]	
+	
+		print " "
 		print "Broadway @ Fenwick:"
 		
 
@@ -190,7 +204,7 @@ class BusSign:
 				self.Thurston89101.append([int(bus),"Sullivan"])
 				
 		print " "
-		print "80 Bus, Medford @ Thurston:"
+		print "Medford @ Thurston:"
 		
 		self.Medford80 = []
 		lechmere_buses = self.medford_soup.find_all('prediction')
@@ -199,10 +213,10 @@ class BusSign:
 			lechmere_buses = map(lambda x: int(x), lechmere_buses)
 			lechmere_buses.sort()   #sorts in place
 			lechmere_buses = map(lambda x: str(x), lechmere_buses)
-			print "89/101 bus(es) to Sullivan: " + ' '.join(lechmere_buses)
+			print "80 bus(es) to Lechmere: " + ' '.join(lechmere_buses)
 
-			for bus in sullivan_buses:
-				self.Medford80.append([int(bus),"Lechemere"])
+			for bus in lechmere_buses:
+				self.Medford80.append([int(bus),"Lechmere"])
 
 	def heartbeat(self):
 		self.isBeating = not self.isBeating
