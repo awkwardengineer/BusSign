@@ -13,6 +13,7 @@ class BusSign:
 
 	def __init__(self):
 		self.myseg=SegDisplay(1,0x03)
+		time.sleep(.1)
 		self.myseg2 = SegDisplay(1,0x02)
 		self.Fenwick89=[]
 		self.Thurston89101=[]
