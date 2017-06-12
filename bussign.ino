@@ -4,6 +4,8 @@
 // This #include statement was automatically added by the Particle IDE.
 #include "PCA9553_LED.h"
 
+#include "BUS_TIMES.h"
+
 #define SHUTDOWN_REG 0x0c
 #define SELF_ADDR_REG 0x2D
 
@@ -13,7 +15,7 @@ int debug3 = 0;
 int debug4;
 int debugByte;
 
-RowBuffer rowbuffer;
+//RowBuffer rowbuffer;
 
 void setup() {
 
@@ -38,30 +40,15 @@ void setup() {
     initAS1115(0x03);
     init_PCA9553();
 
-    //row, position, value
-    rowbuffer.setNumber(0,0,12);
-    rowbuffer.setNumber(0,1,34);
-    rowbuffer.setNumber(0,2,56);
-    rowbuffer.setNumber(0,3,78);
-    /*int digit;
-    for (int i=0; i < 16; i++){
-
-        digit = i;1
-
-        if (digit > 9){
-            digit -= 10;
-        }
-        updateDigit((byte)i,(byte)digit);
-    }*/
 }
 
 void loop() {
     debug1 = flashHeartBeat();
     delay(500);
-    rowbuffer.updateOffset(-1);
+    //rowbuffer.updateOffset(-1);
     debug2 = flashHeartBeat();
     delay(500);
-    rowbuffer.updateOffset(-1);
+    //rowbuffer.updateOffset(-1);
 
     if (debug1 == 1){
         i2creset("astring");
