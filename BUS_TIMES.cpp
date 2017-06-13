@@ -9,8 +9,6 @@ BusTimes::BusTimes(void){
         }
     }
 
-    rowbuffer = RowBuffer();
-
 }
 
 void BusTimes::countDown(void){
@@ -21,6 +19,7 @@ void BusTimes::countDown(void){
             // be incremented
             if (timeBuf[i][j] > 0){
                 timeBuf[i][j]--;
+                sendToRowBuff(i,j,timeBuf[i][j]);
             }
         }
     }

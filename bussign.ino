@@ -59,6 +59,7 @@ void loop() {
     //rowbuffer.updateOffset(-1);
     debug2 = flashHeartBeat();
     delay(500);
+    bustimes.countDown();
     //rowbuffer.updateOffset(-1);
 
     if (debug1 == 1){
