@@ -28,6 +28,7 @@ void BusTimes::countDown(void){
 
 void BusTimes::setBusTime(byte row, byte nextBus,int val){
     timeBuf[row][nextBus] = val;
+    sendToRowBuff(row,nextBus,val);
 }
 
 void BusTimes::sendToRowBuff(byte row, byte nextBus, int val){

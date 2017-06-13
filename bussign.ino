@@ -16,6 +16,7 @@ int debug4;
 int debugByte;
 
 //RowBuffer rowbuffer;
+BusTimes bustimes;
 
 void setup() {
 
@@ -39,6 +40,16 @@ void setup() {
     initAS1115(0x02);
     initAS1115(0x03);
     init_PCA9553();
+
+    bustimes.setBusTime(0, 0, 34);
+    bustimes.setBusTime(0, 1, 150);
+    bustimes.setBusTime(0, 2, 500);
+    bustimes.setBusTime(0, 3, 600);
+
+    bustimes.setBusTime(1, 0, 56);
+    bustimes.setBusTime(1, 1, 1500);
+    bustimes.setBusTime(1, 2, 600);
+    bustimes.setBusTime(1, 3, 500);
 
 }
 
