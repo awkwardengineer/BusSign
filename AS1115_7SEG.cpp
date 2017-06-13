@@ -254,14 +254,26 @@ byte RowBuffer::updateOffset(int row){
         offset[row]++;
     }
 
+
     for (int i=0; i<4;i++){
 
         if (offset[i] > 28){
-            offset[i] = 0;
+            offset[i] = 28;
         }
     }
+
 
     updateDisplay();
 
     return offset[0];
+}
+
+void RowBuffer::clearOffset(){
+    for (int i=0; i<4;i++){
+
+        offset[i] = 0;
+
+    }
+
+    updateDisplay();
 }

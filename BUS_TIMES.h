@@ -18,6 +18,7 @@ class BusTimes{
         void sendAllToRowBuff();
         void setBusTime(byte row, byte nextBus,int val);
         void updateOffset(int row);
+        void clearOffset(void);
         BusTimes(void);
 };
 

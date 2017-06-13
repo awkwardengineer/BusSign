@@ -21,7 +21,7 @@ BusTimes bustimes;
 void setup() {
 
     //set clock speed slow to 10khz
-    Wire.setSpeed(10000);
+    //Wire.setSpeed(10000);
     Wire.begin();
 
 
@@ -41,30 +41,59 @@ void setup() {
     initAS1115(0x03);
     init_PCA9553();
 
-    bustimes.setBusTime(0, 0, 34);
-    bustimes.setBusTime(0, 1, 150);
-    bustimes.setBusTime(0, 2, 500);
-    bustimes.setBusTime(0, 3, 600);
+    bustimes.setBusTime(0, 0, 0);
+    bustimes.setBusTime(0, 1, 1);
+    bustimes.setBusTime(0, 2, 2);
+    bustimes.setBusTime(0, 3, 3);
 
-    bustimes.setBusTime(1, 0, 56);
-    bustimes.setBusTime(1, 1, 1500);
-    bustimes.setBusTime(1, 2, 600);
-    bustimes.setBusTime(1, 3, 500);
+    bustimes.setBusTime(1, 0, 5);
+    bustimes.setBusTime(1, 1, 6);
+    bustimes.setBusTime(1, 2, 7);
+    bustimes.setBusTime(1, 3, 8);
 
 }
 
 void loop() {
-    debug1 = flashHeartBeat();
-    delay(500);
-    //rowbuffer.updateOffset(-1);
-    debug2 = flashHeartBeat();
-    delay(500);
-    bustimes.countDown();
-    //rowbuffer.updateOffset(-1);
+    for(int i=0; i<3;i++){
+        debug1 = flashHeartBeat();
+        delay(500);
 
-    if (debug1 == 1){
-        i2creset("astring");
+        debug2 = flashHeartBeat();
+        delay(500);
+
+        if (debug1 == 1){
+            i2creset("astring");
+        }
+
+        //bustimes.countDown();
     }
+
+    LED_Select(1, LED_ON);
+
+
+    for(int i=0; i<12;i++){
+
+        debug1 = flashHeartBeat();
+        delay(500);
+
+        bustimes.updateOffset(-1);
+
+        debug2 = flashHeartBeat();
+        delay(500);
+        bustimes.updateOffset(-1);
+
+        if (debug1 == 1){
+            i2creset("astring");
+        }
+
+        //bustimes.countDown();
+
+    }
+
+    LED_Select(1, LED_OFF);
+
+    bustimes.clearOffset();
+
 }
 
 //this function can be called by the cloud

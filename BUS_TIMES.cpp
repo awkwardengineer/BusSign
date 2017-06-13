@@ -61,3 +61,15 @@ void BusTimes::sendAllToRowBuff(){
         }
     }
 }
+
+void BusTimes::updateOffset(int row){
+    //rowbuffer is currently programmed on a magic
+    //number 29 move updateOffset cycle
+    rowbuffer.updateOffset(row);
+}
+
+void BusTimes::clearOffset(void){
+
+    rowbuffer.clearOffset();
+
+}
