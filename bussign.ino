@@ -41,15 +41,18 @@ void setup() {
     initAS1115(0x03);
     init_PCA9553();
 
-    bustimes.setBusTime(0, 0, 0);
-    bustimes.setBusTime(0, 1, 1);
-    bustimes.setBusTime(0, 2, 2);
-    bustimes.setBusTime(0, 3, 3);
+    bustimes.setBusTime(0, 0, 10);
+    bustimes.setBusTime(0, 1, 20);
+    bustimes.setBusTime(0, 2, 30);
+    bustimes.setBusTime(0, 3, 40);
 
-    bustimes.setBusTime(1, 0, 5);
-    bustimes.setBusTime(1, 1, 6);
-    bustimes.setBusTime(1, 2, 7);
-    bustimes.setBusTime(1, 3, 8);
+    bustimes.setBusTime(1, 0, 500);
+    bustimes.setBusTime(1, 1, 600);
+    bustimes.setBusTime(1, 2, 700);
+    bustimes.setBusTime(1, 3, 800);
+
+    bustimes.setBusTime(2, 0, 90);
+    bustimes.setBusTime(3, 0, 9);
 
 }
 
@@ -65,13 +68,13 @@ void loop() {
             i2creset("astring");
         }
 
-        //bustimes.countDown();
+        bustimes.countDown();
     }
 
     LED_Select(1, LED_ON);
 
 
-    for(int i=0; i<12;i++){
+    for(int i=0; i<8;i++){
 
         debug1 = flashHeartBeat();
         delay(500);
@@ -86,7 +89,7 @@ void loop() {
             i2creset("astring");
         }
 
-        //bustimes.countDown();
+        bustimes.countDown();
 
     }
 

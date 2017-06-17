@@ -157,36 +157,10 @@ void RowBuffer::updateDisplay(void){
             shift = offset[i];
 
             midshift = shift % 7;
-            shift = floor(shift / 7);
+            shift = 2 * (shift / 7);
 
 
             switch (midshift){
-/*                case 0:
-                    digVal[0] =
-                    digVal[1] =
-                    digVal[2] =
-                    digVal[3] = rowBuf[i][shift];
-                    break;
-                case 0:
-                    digVal[0] =
-                    digVal[1] =
-                    digVal[2] = rowBuf[i][shift];
-                    digVal[3] = rowBuf[i][shift+1];
-                    break;
-                case 0:
-                    digVal[0] =
-                    digVal[1] = rowBuf[i][shift];
-                    digVal[2] = rowBuf[i][shift+1];
-                    digVal[3] =
-                    break;
-                case 0:
-                    digVal[0] =
-                    digVal[1] = rowBuf[i][shift];
-                    digVal[2] = rowBuf[i][shift+1];
-                    digVal[3] =
-                    break;
-*/
-
                 case 0:
                     digVal[0] = rowBuf[i][shift];
                     digVal[1] = rowBuf[i][shift+1];
@@ -228,7 +202,7 @@ void RowBuffer::updateDisplay(void){
                     digVal[1] = rowBuf[i][shift+3];
                     digVal[2] = rowBuf[i][shift+4];
                     digVal[3] = rowBuf[i][shift+5];
-                    offset[i] += 7;
+                    //offset[i] += 7;
                     break;
 
             }
@@ -257,8 +231,8 @@ byte RowBuffer::updateOffset(int row){
 
     for (int i=0; i<4;i++){
 
-        if (offset[i] > 28){
-            offset[i] = 28;
+        if (offset[i] > 14){
+            offset[i] = 14;
         }
     }
 
