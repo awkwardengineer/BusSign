@@ -10,7 +10,7 @@
 #define SELF_ADDR_REG 0x2D
 
 int debug1;
-int debug2;
+String debug2;
 int debug3 = 0;
 int debug4;
 int debugByte;
@@ -35,6 +35,7 @@ void setup() {
     Particle.variable("DebugByte", debugByte);
 
     Particle.function("i2creset", i2creset);
+    Particle.function("setBusTimes", parseMessage);
     //wakeup
 
     initAS1115(0x02);
@@ -61,7 +62,7 @@ void loop() {
         debug1 = flashHeartBeat();
         delay(500);
 
-        debug2 = flashHeartBeat();
+        debug1 = flashHeartBeat();
         delay(500);
 
         if (debug1 == 1){
@@ -79,11 +80,11 @@ void loop() {
         debug1 = flashHeartBeat();
         delay(500);
 
-        bustimes.updateOffset(-1);
+        //bustimes.updateOffset(-1);
 
-        debug2 = flashHeartBeat();
+        debug1 = flashHeartBeat();
         delay(500);
-        bustimes.updateOffset(-1);
+        //bustimes.updateOffset(-1);
 
         if (debug1 == 1){
             i2creset("astring");
@@ -107,5 +108,62 @@ int i2creset(String astring){
     resetAS1115(0x02);
     resetAS1115(0x03);
 
+    return 0;
+}
+
+int parseMessage(String msg){
+//message format is a structured array
+
+//000s000s000s000m000m000m000s000S000M
+//16 sets of 4 bytes. the first 3 bytes in each set are a time, the 4th byte
+//is whether that time is in minutes or seconds.
+//the 16 sets correspond to 4 rows of 4 times
+
+//.toInt()
+//.substring(from, to) from is inclusive, to is exclusive
+//.char at
+
+String submsg;
+char type;
+int nextbustime;
+
+    for(int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            type = msg.charAt( 16*i + 4*j + 3);
+            submsg = msg.substring(16*i + 4*j, 16*i + 4*j + 3);
+
+            if (i == 4 && j ==4){
+                //unfortunately, the buffer is 63 characters, not 64
+                // so we have to skip the very last iteration in the loop
+                nextbustime = submsg.toInt() * 60;
+            }
+            else{
+                switch (type){
+                    case 's':
+                    //time in seconds
+                        nextbustime = submsg.toInt();
+                        break;
+
+                    case 'm':
+                        nextbustime = submsg.toInt() * 60;
+                        break;
+
+                    default:
+                        nextbustime = -1 ;
+                        break;
+
+                }
+            }
+
+            bustimes.setBusTime(i,j,nextbustime);
+        }
+    }
+
+    /*type = msg.charAt( 3);
+    submsg = msg.substring(0, 3);
+    debug2 = type;
+    nextbustime = submsg.toInt();
+    bustimes.setBusTime(0,0,nextbustime);
+*/
     return 0;
 }
