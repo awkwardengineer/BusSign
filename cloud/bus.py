@@ -1,39 +1,68 @@
 import urllib2
 from bs4 import BeautifulSoup
+from  busi2c import *
 import socket
 import time
-import math
-import requests
-import os.path
+from LcdBlinker import *
 
-device = "470053000b51353432383931"
-baseUrl = "https://api.particle.io/v1/devices/"
-arg = "010s020s"
-func = "setBusTimes"
+class BusSign:
+	internetLED = 1
+	nextbusLED = 2	
+	heartbeatLED = 0	
 
-url = baseUrl + device + "/" + func
 
-with open(os.path.expanduser('~/Dropbox/Keys/particletoken'), "r") as f:
-    token = f.read().rstrip()
-    print token
-
-class BusSignCloud:
 	def __init__(self):
-
+		self.myseg=SegDisplay(1,0x03)
+		time.sleep(.1)
+		self.myseg2 = SegDisplay(1,0x02)
 		self.Fenwick89=[]
 		self.Thurston89101=[]
 		self.Malden101=[]
 		self.Medford80=[]
-		self.commandString= ""
+		self.blink = LcdBlinker()
+		self.isBeating = True
+	
+		while not self.isInternetUp:
+			self.heartbeat()
+			time.sleep(1)
+	
+		while True:
+
+			self.heartbeat()
+			
+			if self.getFeed():
+				self.processFeed()
+				self.updateDisplay()	
+
+			for i in range(0,30):
+				print 30-i
+				time.sleep(1)		
+				#decrement the time in the register between updates
+				for j in self.Fenwick89:
+					j[0] -= 1	
+					if j[0] <= 0:
+						j[0]=0	
+	
+				for j in self.Thurston89101:
+					j[0] -= 1	
+					if j[0] <= 0:
+						j[0]=0	
+
+				self.updateDisplay()
+
+
+				self.heartbeat()
 
 	def isInternetUp(self,host="8.8.8.8",port=53,timeout=1):
 		try:
 			socket.setdefaulttimeout(timeout)
 			socket.socket(socket.AF_INET,socket.SOCK_STREAM).connect((host,port))
+			self.blink.setOffLED(self.internetLED)
 			return True
 		except Exception as ex:
 			print ex.message
 			print "No Instanets"
+			self.blink.blinkLED(self.internetLED)
 			return False
 
 	def getFeed(self):
@@ -44,74 +73,70 @@ class BusSignCloud:
 
 				raw_thurston = urllib2.urlopen("http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=mbta&stopId=2704")
 				self.thurston_soup = BeautifulSoup(raw_thurston, "html.parser")
-
+			
 				raw_medford = urllib2.urlopen("http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=mbta&stopId=2387")
 				self.medford_soup = BeautifulSoup(raw_medford, "html.parser")
-
+					
+				self.blink.setOffLED(self.nextbusLED)
 				return True
 			except urllib2.URLError as err:
-				print type(err)
-				print "Feed is Down"
+				print type(err) 
+				print "Feed is Down" 
+				self.blink.blinkLED(self.nextbusLED)
 				return False
 			except socket.timeout as err:
-				print type(err)
+				print type(err)	
 				print "Instanets is down"
+				self.blink.blinkLED(self.nextbusLED)
 				return False
 			except:
+				
+				self.blink.blinkLED(self.nextbusLED)
 				print "Unknown Error"
-
 		else:
 			return False
 
 	def updateDisplay(self):
 
-		self.commandString = ""
 
 		#sort on first key, which is minutes
 		self.Fenwick89.sort(key=lambda x: x[0])
-
-		###Davis is the first line
-		for datapoint in range (0,4):
+		
+		pairOffset = 2
+		for datapoint in range (0,2):
 			if (datapoint + 1) > len(self.Fenwick89):
-				#a negative number turns off the display
-				self.commandString += '-10s'
+				self.myseg.turnPairOff((0+datapoint)+pairOffset)
 			else:
 				if self.Fenwick89[datapoint][1]=="Clarendon":
 					dot = True
 				else:
 					dot = False
+				self.myseg.writeToPair(self.Fenwick89[datapoint][0],(0+datapoint)+pairOffset,dot)
 
-				nextBusTime = self.Fenwick89[datapoint][0]
-				self.commandString += self.intToCommand(nextBusTime);
-
-		###The Malden bus is next
-		for datapoint in range (0,4):
+		pairOffset = 0
+		for datapoint in range (0,2):
 			if (datapoint + 1) > len(self.Malden101):
-				#self.myseg.turnPairOff((0+datapoint)+pairOffset)
-				self.commandString += '-10s'
+				self.myseg.turnPairOff((0+datapoint)+pairOffset)
 			else:
-				nextBusTime = self.Malden101[datapoint][0]
-				self.commandString += self.intToCommand(nextBusTime);
+				self.myseg.writeToPair(self.Malden101[datapoint][0],(0+datapoint)+pairOffset)
 
-		###The Sullivan bus is next
-		for datapoint in range (0,4):
+		pairOffset = 2
+		for datapoint in range (0,2):
 
 			if (datapoint + 1) > len(self.Thurston89101):
-				#self.myseg.turnPairOff((0+datapoint)+pairOffset)
-				self.commandString += '-10s'
+				self.myseg2.turnPairOff((0+datapoint)+pairOffset)
 			else:
-				nextBusTime = self.Thurston89101[datapoint][0]
-				self.commandString += self.intToCommand(nextBusTime);
+				self.myseg2.writeToPair(self.Thurston89101[datapoint][0],(0+datapoint)+pairOffset)
 
-		#end with the Lechmere bus.
-		#I actually short it, and max it at 3 buses to avoid
-		#overflowing the 64character buffer
-		for datapoint in range (0,3):
+
+
+		pairOffset = 0
+		for datapoint in range (0,2):
 			if (datapoint + 1) > len(self.Medford80):
-				self.commandString += '-10s'
+				self.myseg2.turnPairOff((0+datapoint)+pairOffset)
 			else:
-				nextBusTime = self.Medford80[datapoint][0]
-				self.commandString += self.intToCommand(nextBusTime);
+				self.myseg2.writeToPair(self.Medford80[datapoint][0],(0+datapoint)+pairOffset)
+
 
 
 
@@ -120,14 +145,14 @@ class BusSignCloud:
 
 	def processFeed(self):
 
-		self.Fenwick89=[]
-
+		self.Fenwick89=[]	
+	
 		print " "
 		print "Broadway @ Fenwick:"
-
+		
 
 		davis_buses = self.fenwick_soup.find(title='Clarendon Hill')
-		if davis_buses != None:
+		if davis_buses != None:		
 			davis_buses = davis_buses.find_all('prediction')
 			davis_buses = map(lambda x: x['seconds'], davis_buses)
 			print "89 bus(es) to Davis via Clarendon Hill: " + ' '.join(davis_buses)
@@ -135,15 +160,15 @@ class BusSignCloud:
 				self.Fenwick89.append([int(bus),"Clarendon"])
 
 		davis_buses = self.fenwick_soup.find(title='Davis')
-		if davis_buses != None:
+		if davis_buses != None:		
 			davis_buses = davis_buses.find_all('prediction')
 			davis_buses = map(lambda x: x['seconds'], davis_buses)
 			print "89 bus(es) to Davis: " + ' '.join(davis_buses)
 			for bus in davis_buses:
 				self.Fenwick89.append([int(bus),"Davis"])
-
+		
 		davis_buses = self.fenwick_soup.find(title='Clarendon Hill via Davis')
-		if davis_buses != None:
+		if davis_buses != None:		
 			davis_buses = davis_buses.find_all('prediction')
 			davis_buses = map(lambda x: x['seconds'], davis_buses)
 			print "89 bus(es) to Davis: " + ' '.join(davis_buses)
@@ -152,7 +177,7 @@ class BusSignCloud:
 
 
 
-		self.Malden101 = []
+		self.Malden101 = []	
 		malden_buses = self.fenwick_soup.find(title='Malden')
 		if malden_buses != None:
 			malden_buses = malden_buses.find_all('prediction')
@@ -166,10 +191,10 @@ class BusSignCloud:
 
 		print " "
 		print "Broadway @ Thurston:"
-
+		
 		self.Thurston89101 = []
 		sullivan_buses = self.thurston_soup.find_all('prediction')
-		if sullivan_buses != None:
+		if sullivan_buses != None:	
 			sullivan_buses = map(lambda x: x['seconds'], sullivan_buses)
 			sullivan_buses = map(lambda x: int(x), sullivan_buses)
 			sullivan_buses.sort()   #sorts in place
@@ -178,13 +203,13 @@ class BusSignCloud:
 
 			for bus in sullivan_buses:
 				self.Thurston89101.append([int(bus),"Sullivan"])
-
+				
 		print " "
 		print "Medford @ Thurston:"
-
+		
 		self.Medford80 = []
 		lechmere_buses = self.medford_soup.find_all('prediction')
-		if lechmere_buses != None:
+		if lechmere_buses != None:	
 			lechmere_buses = map(lambda x: x['seconds'], lechmere_buses)
 			lechmere_buses = map(lambda x: int(x), lechmere_buses)
 			lechmere_buses.sort()   #sorts in place
@@ -194,30 +219,13 @@ class BusSignCloud:
 			for bus in lechmere_buses:
 				self.Medford80.append([int(bus),"Lechmere"])
 
-	def intToCommand(self, number):
-		tempString = ""
-		if int(number) < 999:
-			#make it a string
-			tempString = str(number).zfill(3) + 's'
+	def heartbeat(self):
+		self.isBeating = not self.isBeating
+	
+		if self.isBeating:
+			self.blink.setOnLED(self.heartbeatLED)
 		else:
-			tempString = int(math.floor(number/10))
-			tempString = str(tempString).zfill(3)
-			tempString += 'm'
+			self.blink.setOffLED(self.heartbeatLED)
 
-		return tempString
-
-	def sendToCloud(self):
-		payload = {'arg':self.commandString, 'access_token':token}
-		r = requests.post(url, data = payload)
-
-
-a = BusSignCloud()
-
-while(True):
-	if a.getFeed():
-		a.processFeed()
-		a.updateDisplay()
-		a.sendToCloud()
-		time.sleep(30)
-	else:
-		time.sleep(5)
+	
+sign = BusSign()

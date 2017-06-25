@@ -20,7 +20,7 @@ payload = {'arg':arg, 'access_token':token}
 r = requests.post(url, data = payload)
 
 print r.url
-print ""
+print r.text
 
 """
 def isInternetUp(self,host="8.8.8.8",port=53,timeout=1):

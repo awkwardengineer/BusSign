@@ -14,6 +14,7 @@ String debug2;
 int debug3 = 0;
 int debug4;
 int debugByte;
+int lightCounter = 0;
 
 //RowBuffer rowbuffer;
 BusTimes bustimes;
@@ -42,23 +43,31 @@ void setup() {
     initAS1115(0x03);
     init_PCA9553();
 
-    bustimes.setBusTime(0, 0, 10);
-    bustimes.setBusTime(0, 1, 20);
+    bustimes.setBusTime(0, 0, 30);
+    bustimes.setBusTime(0, 1, 30);
     bustimes.setBusTime(0, 2, 30);
-    bustimes.setBusTime(0, 3, 40);
+    bustimes.setBusTime(0, 3, 30);
 
-    bustimes.setBusTime(1, 0, 500);
-    bustimes.setBusTime(1, 1, 600);
-    bustimes.setBusTime(1, 2, 700);
-    bustimes.setBusTime(1, 3, 800);
+    bustimes.setBusTime(1, 0, 30);
+    bustimes.setBusTime(1, 1, 30);
+    bustimes.setBusTime(1, 2, 30);
+    bustimes.setBusTime(1, 3, 30);
 
-    bustimes.setBusTime(2, 0, 90);
-    bustimes.setBusTime(3, 0, 9);
+    bustimes.setBusTime(2, 0, 30);
+    bustimes.setBusTime(2, 1, 30);
+    bustimes.setBusTime(2, 2, 30);
+    bustimes.setBusTime(2, 3, 30);
+
+    bustimes.setBusTime(3, 0, 30);
+    bustimes.setBusTime(3, 1, 30);
+    bustimes.setBusTime(3, 2, 30);
+    bustimes.setBusTime(3, 3, 30);
+
 
 }
 
 void loop() {
-    for(int i=0; i<3;i++){
+    while(lightCounter < 7){
         debug1 = flashHeartBeat();
         delay(500);
 
@@ -70,13 +79,57 @@ void loop() {
         }
 
         bustimes.countDown();
+
+        lightCounter++;
+    }
+
+    LED_Select(3, LED_ON);
+
+
+    while(lightCounter < 15){
+
+        debug1 = flashHeartBeat();
+        delay(500);
+
+        //bustimes.updateOffset(-1);
+
+        debug1 = flashHeartBeat();
+        delay(500);
+        //bustimes.updateOffset(-1);
+
+        if (debug1 == 1){
+            i2creset("astring");
+        }
+
+        bustimes.countDown();
+
+        lightCounter++;
+    }
+
+    LED_Select(2, LED_ON);
+
+    while(lightCounter < 23){
+        debug1 = flashHeartBeat();
+        delay(500);
+
+        //bustimes.updateOffset(-1);
+
+        debug1 = flashHeartBeat();
+        delay(500);
+        //bustimes.updateOffset(-1);
+
+        if (debug1 == 1){
+            i2creset("astring");
+        }
+
+        bustimes.countDown();
+
+        lightCounter++;
     }
 
     LED_Select(1, LED_ON);
 
-
-    for(int i=0; i<8;i++){
-
+    while(lightCounter >= 23){
         debug1 = flashHeartBeat();
         delay(500);
 
@@ -91,12 +144,11 @@ void loop() {
         }
 
         bustimes.countDown();
-
     }
 
-    LED_Select(1, LED_OFF);
-
     bustimes.clearOffset();
+
+    //bustimes.clearOffset();
 
 }
 
@@ -145,7 +197,7 @@ int nextbustime;
                         break;
 
                     case 'm':
-                        nextbustime = submsg.toInt() * 60;
+                        nextbustime = submsg.toInt() * 10;
                         break;
 
                     default:
@@ -158,6 +210,12 @@ int nextbustime;
             bustimes.setBusTime(i,j,nextbustime);
         }
     }
+
+    LED_Select(1, LED_OFF);
+    LED_Select(2, LED_OFF);
+    LED_Select(3, LED_OFF);
+
+    lightCounter = 0;
 
     /*type = msg.charAt( 3);
     submsg = msg.substring(0, 3);
