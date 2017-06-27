@@ -194,6 +194,10 @@ class BusSignCloud:
 			for bus in lechmere_buses:
 				self.Medford80.append([int(bus),"Lechmere"])
 
+		print " "
+		print "===================================="
+		print " "
+
 	def intToCommand(self, number):
 		tempString = ""
 		if int(number) < 999:
@@ -208,7 +212,11 @@ class BusSignCloud:
 
 	def sendToCloud(self):
 		payload = {'arg':self.commandString, 'access_token':token}
-		r = requests.post(url, data = payload)
+		try:
+		    r = requests.post(url, data = payload, timeout = 5)
+		except:
+			print "Error posting to particle:"
+
 
 
 a = BusSignCloud()
