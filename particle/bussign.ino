@@ -178,9 +178,12 @@ int parseMessage(String msg){
 String submsg;
 char type;
 int nextbustime;
+byte dot;
 
     for(int i = 0; i < 4; i++){
         for (int j = 0; j < 4; j++){
+			dot = false;
+
             type = msg.charAt( 16*i + 4*j + 3);
             submsg = msg.substring(16*i + 4*j, 16*i + 4*j + 3);
 
@@ -200,6 +203,17 @@ int nextbustime;
                         nextbustime = submsg.toInt() * 10;
                         break;
 
+					case 'S':
+                    //time in seconds
+                        nextbustime = submsg.toInt();
+						dot = true;
+                        break;
+
+                    case 'M':
+                        nextbustime = submsg.toInt() * 10;
+						dot = true;
+                        break;
+
                     default:
                         nextbustime = -1 ;
                         break;
@@ -207,7 +221,7 @@ int nextbustime;
                 }
             }
 
-            bustimes.setBusTime(i,j,nextbustime);
+            bustimes.setBusTime(i,j,nextbustime,dot);
         }
     }
 

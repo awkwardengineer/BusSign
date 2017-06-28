@@ -76,13 +76,17 @@ class BusSignCloud:
 				#a negative number turns off the display
 				self.commandString += '-10s'
 			else:
+				nextBusTime = self.Fenwick89[datapoint][0]
+
 				if self.Fenwick89[datapoint][1]=="Clarendon":
 					dot = True
+					self.commandString += self.intToCommand(nextBusTime).upper();
 				else:
 					dot = False
+					self.commandString += self.intToCommand(nextBusTime);
 
-				nextBusTime = self.Fenwick89[datapoint][0]
-				self.commandString += self.intToCommand(nextBusTime);
+
+
 
 		###The Malden bus is next
 		for datapoint in range (0,4):
@@ -212,6 +216,11 @@ class BusSignCloud:
 
 	def sendToCloud(self):
 		payload = {'arg':self.commandString, 'access_token':token}
+
+		print ""
+		print self.commandString
+		print ""
+
 		try:
 		    r = requests.post(url, data = payload, timeout = 5)
 		except:

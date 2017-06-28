@@ -25,6 +25,7 @@ class RowBuffer {
 
     public:
         void setNumber(byte row, byte pos, int val);
+		void setNumber(byte row, byte pos, int val, bool dot);
         void clearRows();
         void clearOffset();
         byte updateOffset(int row);

@@ -139,6 +139,23 @@ void RowBuffer::setNumber(byte row, byte pos, int val){
     updateDisplay();
 }
 
+void RowBuffer::setNumber(byte row, byte pos, int val, bool dot){
+//applies the dot after writing the number
+	setNumber(row,pos,val);
+
+	if (dot){
+		byte lowerdigit;
+
+		lowerdigit = rowBuf[row][pos*2 + 1];
+		lowerdigit |= 0b10000000;
+
+		rowBuf[row][pos*2 + 1] =lowerdigit;
+
+		updateDisplay();
+	}
+
+}
+
 void RowBuffer::updateDisplay(void){
 
     byte pos[4];
